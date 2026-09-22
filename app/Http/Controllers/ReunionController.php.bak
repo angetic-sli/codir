@@ -1,0 +1,215 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Exports\ReunionDetailExport;
+use App\Exports\ReunionsExport;
+use App\Models\Activite;
+use App\Models\Reunion;
+use App\Models\Tache;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+
+class ReunionController extends Controller
+{
+    private const STATUTS = ['A faire', 'En cours', 'Terminé', 'En retard'];
+
+    public function index()
+    {
+        $reunions = Reunion::withCount('taches')->latest('date')->paginate(10);
+        return view('reunions.index', compact('reunions'));
+    }
+
+    public function create()
+    {
+        return view('reunions.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'titre' => ['required', 'string', 'max:255'],
+            'date' => ['required', 'date'],
+            'lieu' => ['required', 'string', 'max:255'],
+            'heure_debut' => ['required', 'date_format:H:i'],
+            'heure_fin' => ['required', 'date_format:H:i', 'after:heure_debut'],
+            'ordre_du_jour' => ['required', 'string'],
+        ]);
+
+        Reunion::create($data);
+        return redirect()->route('reunions.index')->with('success', 'Réunion créée avec succès.');
+    }
+
+    public function show(Reunion $reunion)
+    {
+        $reunion->load(['taches.activite', 'taches.users', 'taches.livrables']);
+        return view('reunions.show', compact('reunion'));
+    }
+
+    public function edit(Reunion $reunion)
+    {
+        $reunion->load(['taches.users']);
+        $activites = Activite::orderBy('titre')->get();
+        $users = User::orderBy('nom')->orderBy('prenoms')->get();
+        $statuts = self::STATUTS;
+        return view('reunions.edit', compact('reunion', 'activites', 'users', 'statuts'));
+    }
+
+    public function update(Request $request, Reunion $reunion)
+    {
+        $data = $request->validate([
+            'titre' => ['required', 'string', 'max:255'],
+            'date' => ['required', 'date'],
+            'lieu' => ['required', 'string', 'max:255'],
+            'heure_debut' => ['required', 'date_format:H:i'],
+            'heure_fin' => ['required', 'date_format:H:i', 'after:heure_debut'],
+            'ordre_du_jour' => ['required', 'string'],
+            'taches' => ['nullable', 'array'],
+            'taches.*.id' => ['nullable', 'integer', 'exists:taches,id'],
+            'taches.*.ordre' => ['nullable', 'integer', 'min:1'],
+            'taches.*.titre' => ['required', 'string', 'max:255'],
+            'taches.*.activite_id' => ['required', 'integer', 'exists:activites,id'],
+            'taches.*.recommandations' => ['nullable', 'string'],
+            'taches.*.date_debut' => ['nullable', 'date'],
+            'taches.*.date_fin' => ['nullable', 'date', 'after_or_equal:taches.*.date_debut'],
+            'taches.*.livrable' => ['nullable', 'string'],
+            'taches.*.statut' => ['required', 'in:' . implode(',', self::STATUTS)],
+            'taches.*.users' => ['nullable', 'array'],
+            'taches.*.users.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        DB::transaction(function () use ($data, $reunion) {
+            // Mettre à jour uniquement les informations réellement envoyées pour la réunion.
+            $reunionData = collect($data)->except('taches')->all();
+            $reunion->fill($reunionData);
+            $reunion->save();
+
+            $submittedTaskIds = [];
+
+            foreach (array_values($data['taches'] ?? []) as $position => $tacheData) {
+                $taskId = !empty($tacheData['id']) ? (int) $tacheData['id'] : null;
+
+                if ($taskId) {
+                    // Sécurité : une tâche d'une autre réunion ne peut pas être modifiée.
+                    $tache = Tache::where('reunion_id', $reunion->id)
+                        ->whereKey($taskId)
+                        ->firstOrFail();
+                    $submittedTaskIds[] = $tache->id;
+                } else {
+                    $tache = new Tache();
+                    $tache->reunion_id = $reunion->id;
+                }
+
+                // Ne pas utiliser un tableau incomplet avec update() : on affecte explicitement
+                // chaque champ de la tâche afin qu'aucune information existante ne soit perdue
+                // à cause d'une clé absente dans la requête. Une valeur vide envoyée par le
+                // formulaire reste volontairement vide (l'utilisateur peut donc effacer un champ).
+                $tache->titre = $tacheData['titre'];
+                $tache->activite_id = $tacheData['activite_id'];
+                $tache->statut = $tacheData['statut'];
+                $tache->recommandations = array_key_exists('recommandations', $tacheData)
+                    ? ($tacheData['recommandations'] === '' ? null : $tacheData['recommandations'])
+                    : $tache->recommandations;
+                $tache->date_debut = array_key_exists('date_debut', $tacheData)
+                    ? ($tacheData['date_debut'] === '' ? null : $tacheData['date_debut'])
+                    : $tache->date_debut;
+                $tache->date_fin = array_key_exists('date_fin', $tacheData)
+                    ? ($tacheData['date_fin'] === '' ? null : $tacheData['date_fin'])
+                    : $tache->date_fin;
+                $tache->livrable = array_key_exists('livrable', $tacheData)
+                    ? ($tacheData['livrable'] === '' ? null : $tacheData['livrable'])
+                    : $tache->livrable;
+                $tache->ordre = $position + 1;
+                $tache->save();
+
+                // Le tableau users[] peut être absent lorsque Select2 n'a aucun utilisateur sélectionné.
+                // Dans ce cas, la sélection doit être vidée volontairement.
+                $tache->users()->sync($tacheData['users'] ?? []);
+            }
+
+            // Si une tâche existante a été retirée du formulaire, elle doit réellement être supprimée.
+            // Cela évite les anciennes tâches fantômes qui réapparaissent après l'enregistrement.
+            $existingTaskIds = $reunion->taches()->pluck('id')->all();
+            $taskIdsToDelete = array_diff($existingTaskIds, $submittedTaskIds);
+            if (!empty($taskIdsToDelete)) {
+                Tache::where('reunion_id', $reunion->id)
+                    ->whereIn('id', $taskIdsToDelete)
+                    ->delete();
+            }
+        });
+
+        return redirect()->route('reunions.show', $reunion)->with('success', 'Réunion et tâches mises à jour avec succès.');
+    }
+
+    public function destroyTache(Reunion $reunion, Tache $tache)
+    {
+        abort_unless($tache->reunion_id === $reunion->id, 404);
+        $tache->delete();
+        return redirect()->route('reunions.edit', $reunion)->with('success', 'Tâche supprimée avec succès.');
+    }
+
+    public function destroy(Reunion $reunion)
+    {
+        $reunion->delete();
+        return redirect()->route('reunions.index')->with('success', 'Réunion supprimée avec succès.');
+    }
+
+    public function exportExcel()
+    {
+        $filename = 'reunions_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new ReunionsExport, $filename);
+    }
+
+    public function exportPdf()
+    {
+        $reunions = Reunion::with('taches')
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->get();
+
+        $pdf = Pdf::loadView('reunions.rapport-pdf', compact('reunions'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('reunions_' . now()->format('Y-m-d_H-i-s') . '.pdf');
+    }
+
+    public function exportReunionExcel(Reunion $reunion)
+    {
+        $filename = 'reunion_' . $reunion->id . '_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new ReunionDetailExport($reunion->id), $filename);
+    }
+
+    public function exportReunionPdf(Reunion $reunion)
+    {
+        $reunion->load(['taches.activite', 'taches.users']);
+
+        $pdf = Pdf::loadView('reunions.detail-pdf', compact('reunion'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('reunion_' . $reunion->id . '_' . now()->format('Y-m-d_H-i-s') . '.pdf');
+    }
+
+    public function duplicate(Reunion $reunion)
+    {
+        $newReunion = DB::transaction(function () use ($reunion) {
+            $reunion->load('taches.users');
+            $copy = $reunion->replicate();
+            $copy->titre = $reunion->titre . ' - Copie';
+            $copy->save();
+
+            foreach ($reunion->taches as $tache) {
+                $newTache = $tache->replicate();
+                $newTache->reunion_id = $copy->id;
+                $newTache->save();
+                $newTache->users()->sync($tache->users->modelKeys());
+            }
+
+            return $copy;
+        });
+
+        return redirect()->route('reunions.edit', $newReunion)->with('success', 'Réunion dupliquée avec succès.');
+    }
+}

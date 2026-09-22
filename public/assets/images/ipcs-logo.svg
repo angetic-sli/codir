@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
+  <title id="title">IPCS</title><desc id="desc">Logo IPCS stylisé</desc>
+  <rect width="1000" height="420" rx="40" fill="#ffffff"/>
+  <g stroke="#ffffff" stroke-width="5" stroke-linejoin="round">
+    <polygon points="120,125 205,76 290,125 205,174" fill="#f39a00"/>
+    <polygon points="120,125 205,174 205,274 120,225" fill="#ffe000"/>
+    <polygon points="205,174 290,125 290,225 205,274" fill="#0618a8"/>
+    <polygon points="205,76 290,27 375,76 290,125" fill="#f39a00"/>
+    <polygon points="290,125 375,76 375,176 290,225" fill="#0618a8"/>
+    <polygon points="290,225 375,176 375,276 290,325" fill="#ffe000"/>
+    <polygon points="120,225 205,274 205,374 120,325" fill="#f39a00"/>
+    <polygon points="205,274 290,225 290,325 205,374" fill="#0618a8"/>
+  </g>
+  <text x="420" y="275" font-family="Arial, Helvetica, sans-serif" font-size="190" font-weight="800" letter-spacing="-8" fill="#0618a8">IPCS</text>
+</svg>
