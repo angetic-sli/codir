@@ -1,4 +1,4 @@
-name: Deploy to LWS
+name: Deploy to cPanel
 
 on:
   push:
