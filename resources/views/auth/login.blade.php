@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Connexion à CODIR APP — plateforme de pilotage et de gestion du Comité de Direction.">
-    <title>Connexion — CODIR APP</title>
+    <meta name="description" content="Connexion à Comigest — plateforme de pilotage et de gestion du Comité de Direction.">
+    <title>Connexion — Comigest</title>
     <link rel="icon" href="{{ asset(config('ipcs.logo')) }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/codir-modern.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/icon/font-awesome/css/font-awesome.min.css') }}">
@@ -42,7 +42,7 @@
         <div class="login-showcase-inner">
             <a href="{{ url('/') }}" class="login-brand">
                 <span class="login-brand-mark ipcs-login-logo"><img src="{{ asset(config('ipcs.logo')) }}" alt="IPCS"></span>
-                <span class="login-brand-name">IPCS · CODIR APP<small>Espace de pilotage interne</small></span>
+                <span class="login-brand-name">IPCS · Comigest<small>Espace de pilotage interne</small></span>
             </a>
             <h1>Pilotez {{ config('ipcs.name') }} avec <span>plus de clarté.</span></h1>
             <p>Retrouvez au même endroit les réunions CODIR, activités, tâches, obligations, livrables, clients et indicateurs de pilotage d’IPCS.</p>
@@ -57,7 +57,7 @@
 
     <main class="login-panel">
         <div class="login-form-wrap">
-            <a href="{{ url('/') }}" class="login-mobile-brand"><img src="{{ asset(config('ipcs.logo')) }}" alt="IPCS"><strong>IPCS · CODIR APP</strong></a>
+            <a href="{{ url('/') }}" class="login-mobile-brand"><img src="{{ asset(config('ipcs.logo')) }}" alt="IPCS"><strong>IPCS · Comigest</strong></a>
             <div class="login-eyebrow">IPCS · Espace sécurisé</div>
             <h2 class="login-title">Bienvenue</h2>
             <p class="login-subtitle">Connectez-vous à votre espace de pilotage.</p>

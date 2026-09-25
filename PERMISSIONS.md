@@ -1,4 +1,4 @@
-# CODIR APP — Permissions
+# Comigest — Permissions
 
 L'application utilise `spatie/laravel-permission` avec une autorisation centrale par nom de route et des contrôles `@can(...)` dans les vues.
 

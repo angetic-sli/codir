@@ -10,7 +10,7 @@
 </head>
 <body class="landing ipcs-landing">
 <nav class="landing-nav"><div class="landing-container landing-nav-inner">
-<a href="{{ route('home') }}" class="ipcs-logo-lockup"><img src="{{ asset(config('ipcs.logo')) }}" alt="IPCS"><strong>CODIR APP</strong></a>
+<a href="{{ route('home') }}" class="ipcs-logo-lockup"><img src="{{ asset(config('ipcs.logo')) }}" alt="IPCS"><strong>Comigest</strong></a>
 <div class="landing-links"><a href="#entreprise">IPCS</a><a href="#services">Services</a><a href="#pilotage">Pilotage</a><a href="#contact">Contact</a></div>
 <div><a class="landing-nav-cta" href="{{ route('login') }}">Accéder au CODIR</a></div>
 </div></nav>

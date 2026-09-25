@@ -3,7 +3,7 @@
 return [
     'name' => 'IVOIRE PLURIEL CONSEILS ET SERVICES',
     'short_name' => 'IPCS',
-    'platform' => 'CODIR APP',
+    'platform' => 'Comigest',
     'website' => 'https://ipcs-ci.com/',
     'logo' => 'assets/images/ipcs-logo.svg',
     'description' => 'Solutions de mobilité connectée, pilotage des activités et gouvernance interne.',

@@ -420,7 +420,7 @@
             <div class="row align-items-center">
                 <div class="col-md-8">
                     <h5>Tableau de bord</h5>
-                    <p class="text-muted mb-0">Bienvenue dans l’espace de pilotage IPCS · CODIR APP</p>
+                    <p class="text-muted mb-0">Bienvenue dans l’espace de pilotage IPCS · Comigest</p>
                 </div>
                 <div class="col-md-4 text-right">
                     <span class="badge badge-light">{{ date('d/m/Y') }}</span>

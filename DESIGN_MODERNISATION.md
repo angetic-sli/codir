@@ -1,4 +1,4 @@
-# Modernisation UI — CODIR APP
+# Modernisation UI — Comigest
 
 Interface modernisée et responsive, inspirée des principes observés sur PrepaENA : hiérarchie visuelle claire, hero avec CTA, cartes, statistiques, espaces généreux et navigation simple.
 

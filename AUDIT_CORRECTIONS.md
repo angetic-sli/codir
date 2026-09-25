@@ -1,4 +1,4 @@
-# CODIR APP — Corrections techniques
+# Comigest — Corrections techniques
 
 Cette version corrige les principaux problèmes identifiés lors de l'audit technique.
 

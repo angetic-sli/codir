@@ -1,5 +1,5 @@
 @extends('admin_layout.app')
-@section('title','Tableau de bord — IPCS CODIR APP')
+@section('title','Tableau de bord — IPCS Comigest')
 @section('admin')
 <div class="codir-page-head"><div><div class="codir-eyebrow">Vue d'ensemble</div><h1>Bonjour {{ Auth::user()->prenoms ?? Auth::user()->nom ?? 'à vous' }} 👋</h1><p>Voici l'état actuel de l'activité et des décisions d'IPCS.</p></div><div class="codir-actions"><a href="{{ route('reunions.create') }}" class="btn btn-primary"><i class="fa fa-plus mr-1"></i> Nouvelle réunion</a><a href="{{ route('rapports.codir.index') }}" class="btn btn-light"><i class="fa fa-bar-chart mr-1"></i> Voir le rapport</a></div></div>
 <div class="row mb-3">

@@ -1,7 +1,7 @@
-# CODIR APP - Windows/XAMPP setup
+# Comigest - Windows/XAMPP setup
 $ErrorActionPreference = "Stop"
 
-Write-Host "== CODIR APP setup ==" -ForegroundColor Cyan
+Write-Host "== Comigest setup ==" -ForegroundColor Cyan
 
 if (-not (Test-Path ".env")) {
     Copy-Item ".env.example" ".env"

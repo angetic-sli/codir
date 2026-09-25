@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'CODIR APP')</title>
-    <meta name="description" content="CODIR APP — pilotage des réunions, activités, tâches et obligations.">
+    <title>@yield('title', 'Comigest')</title>
+    <meta name="description" content="Comigest — pilotage des réunions, activités, tâches et obligations.">
     <link rel="icon" href="{{ asset(config('ipcs.logo')) }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/icon/themify-icons/themify-icons.css') }}">
